@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({
 const mongoose = require('mongoose');
 
 // connect to the database
-mongoose.connect('mongodb://localhost:27017/museum', {
+mongoose.connect('mongodb://localhost:27017/doggos', {
   useNewUrlParser: true
 });
 
@@ -23,15 +23,27 @@ const upload = multer({
   }
 });
 
-// Create a scheme for items in the museum: a title and a path to an image.
-const itemSchema = new mongoose.Schema({
+// Create a Kennel model
+const kennelSchema = new mongoose.Schema({
   title: String,
   path: String,
-  desc: String,
+  slogan: String,
+  city: String,
 });
+const Kennel = mongoose.model('Kennel', kennelSchema);
 
-// Create a model for items in the museum.
-const Item = mongoose.model('Item', itemSchema);
+// Create a Dog model
+const dogSchema = new mongoose.Schema({
+  kennel: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Kennel'
+  },
+  name: String,
+  path: String, 
+  age: Number,
+  breed: String,
+});
+const Dog = mongoose.model('Dog', dogSchema);
 
 // Upload a photo. Uses the multer middleware for the upload and then returns
 // the path where the photo is stored in the file system.
@@ -46,16 +58,16 @@ app.post('/api/photos', upload.single('photo'), async (req, res) => {
 });
 
 // Create a new item in the museum: takes a title and a path to an image.
-app.post('/api/items', async (req, res) => {
-  const item = new Item({
+app.post('/api/kennels', async (req, res) => {
+  const kennel = new Kennel({
     title: req.body.title,
     path: req.body.path,
-    desc: req.body.desc,
+    slogan: req.body.slogan,
+    city: req.body.city,
   });
   try {
-    await item.save();
-    // console.log(item);
-    res.send(item);
+    await kennel.save();
+    res.send(kennel);
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
@@ -64,10 +76,10 @@ app.post('/api/items', async (req, res) => {
 
 
 // Get a list of all of the items in the museum.
-app.get('/api/items', async (req, res) => {
+app.get('/api/kennels', async (req, res) => {
   try {
-    let items = await Item.find();
-    res.send(items);
+    let kennels = await Kennel.find();
+    res.send(kennels);
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
