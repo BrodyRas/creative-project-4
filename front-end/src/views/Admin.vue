@@ -14,7 +14,7 @@
             <br />
             <input type="text" v-model="newKennelSlogan" placeholder="Slogan" /> <br />
             <input type="text" v-model="newKennelCity" placeholder="City" /> <br />
-            <button @click="uploadKennel">Upload</button>
+            <button @click="uploadKennel">Create Kennel!</button>
           </div>
           <div class="upload" v-if="newKennel">
             <h2>{{ newKennel.title }}</h2>
@@ -27,11 +27,11 @@
         </div>
         <div class="edit">
           <div class="form">
-            <input v-model="findKennel" placeholder="Search" />
-            <div class="suggestions" v-if="suggestions.length > 0">
+            <input v-model="findKennel" placeholder="Search Kennels" />
+            <div class="suggestions" v-if="kennelSuggestions.length > 0">
               <div
                 class="suggestion"
-                v-for="s in suggestions"
+                v-for="s in kennelSuggestions"
                 :key="s.id"
                 @click="selectKennel(s)"
               >
@@ -48,8 +48,8 @@
             <input type="text" v-model="editKennelCity"> <br>
           </div> <br>
           <div class="actions" v-if="foundKennel">
-            <button @click="deleteItem(foundKennel)">Delete</button>
-            <button @click="editItem(foundKennel)">Edit</button>
+            <button @click="deleteKennel(foundKennel)">Delete</button>
+            <button @click="editKennel(foundKennel)">Edit</button>
           </div>
         </div>
       </div>
@@ -66,7 +66,20 @@
             <br />
             <input type="number" v-model="newDogAge" placeholder="Age" /> <br />
             <input type="text" v-model="newDogBreed" placeholder="Breed" /> <br />
-            <button @click="uploadDog">Upload</button>
+            <div class="form">
+            <input v-model="newDogKennelTitle" placeholder="Kennel" />
+            <div class="suggestions" v-if="kennelSuggestions.length > 0">
+              <div
+                class="suggestion"
+                v-for="s in kennelSuggestions"
+                :key="s.id"
+                @click="selectDogKennel(s)"
+              >
+                {{ s.title }}
+              </div>
+            </div>
+          </div>
+            <button @click="uploadDog">Send to Kennel!</button>
           </div>
           <div class="upload" v-if="newDog">
             <h2>{{ newDog.name }}</h2>
@@ -80,11 +93,11 @@
         </div>
         <div class="edit">
           <div class="form">
-            <input v-model="findKennel" placeholder="Search" />
-            <div class="suggestions" v-if="suggestions.length > 0">
+            <input v-model="findDog" placeholder="Search Dogs" />
+            <div class="suggestions" v-if="dogSuggestions.length > 0">
               <div
                 class="suggestion"
-                v-for="s in suggestions"
+                v-for="s in dogSuggestions"
                 :key="s.id"
                 @click="selectDog(s)"
               >
@@ -112,6 +125,7 @@
 <style scoped>
 .container {
   display: grid;
+  align-content: center;
   grid-template: 1fr 1fr / 1fr;
   background-color: pink;
 }
@@ -204,7 +218,6 @@ export default {
       newKennelTitle: "",
       newKennelSlogan: "",
       newKennelCity: "",
-      file: null,
       newKennel: null,
       findKennel: "",
       foundKennel: null,
@@ -218,6 +231,8 @@ export default {
       newDogFile: null,
       newDogAge: 0,
       newDogBreed: "",
+      newDogKennel: null,
+      newDogKennelTitle: "",
       findDog: "",
       foundDog: null,
       editDogName: "",
@@ -229,11 +244,17 @@ export default {
     this.getData();
   },
   computed: {
-    suggestions() {
+    kennelSuggestions() {
       let kennels = this.kennels.filter((item) =>
         item.title.toLowerCase().startsWith(this.findKennel.toLowerCase())
       );
       return kennels.sort((a, b) => a.title > b.title);
+    },
+    dogSuggestions() {
+      let dogs = this.dogs.filter((item) =>
+        item.title.toLowerCase().startsWith(this.findDog.toLowerCase())
+      );
+      return dogs.sort((a, b) => a.title > b.title);
     },
   },
   methods: {
@@ -241,6 +262,8 @@ export default {
       try {
         let response = await axios.get("/api/kennels");
         this.kennels = response.data;
+        response = await axios.get("/api/dogs");
+        this.dogs = response.data;
         return true;
       } catch (e) {
         console.log(e);
@@ -260,11 +283,16 @@ export default {
       this.editDogAge = this.foundDog.age;
       this.editDogBreed = this.foundDog.breed;
     },
+    selectDogKennel(kennel) {
+      this.findKennel = "";
+      this.newDogKennel = kennel;
+      this.newDogKennelTitle = kennel.title;
+    },
     async deleteKennel(kennel) {
       try {
         await axios.delete("/api/kennels/" + kennel._id);
         this.foundKennel = null;
-        this.getItems();
+        this.getData();
         return true;
       } catch (error) {
         console.log(error);
@@ -274,7 +302,7 @@ export default {
       try {
         await axios.delete("/api/dogs/" + dog._id);
         this.foundDog = null;
-        this.getItems();
+        this.getData();
         return true;
       } catch (error) {
         console.log(error);
@@ -325,16 +353,16 @@ export default {
     },
     async uploadKennel() {
       try {
-        const formData = new FormData();
-        formData.append("photo", this.file, this.file.name);
-        let r1 = await axios.post("/api/photos", formData);
         let r2 = await axios.post("/api/kennels", {
-          title: this.title,
-          path: r1.data.path,
-          slogan: this.slogan,
-          city: this.city,
+          title: this.newKennelTitle,
+          slogan: this.newKennelSlogan,
+          city: this.newKennelCity,
         });
         this.addItem = r2.data;
+        this.newKennelTitle = "";
+        this.newKennelSlogan = "";
+        this.newKennelCity = "";
+        this.getData();
       } catch (error) {
         console.log(error);
       }
@@ -345,10 +373,11 @@ export default {
         formData.append("photo", this.file, this.file.name);
         let r1 = await axios.post("/api/photos", formData);
         let r2 = await axios.post("/api/kennels", {
-          title: this.title,
+          name: this.newDogName,
+          kennel: this.newDogKennel,
           path: r1.data.path,
-          slogan: this.slogan,
-          city: this.city,
+          breed: this.newDogBreed,
+          age: this.newDogAge,
         });
         this.addItem = r2.data;
       } catch (error) {
