@@ -64,6 +64,9 @@
             <p></p>
             <input type="file" name="photo" @change="fileChanged" /> <br />
             <br />
+            <!-- <div v-if="newDogFile !== null">
+              <img src="" alt="">
+            </div> -->
             <input type="number" v-model="newDogAge" placeholder="Age" /> <br />
             <input type="text" v-model="newDogBreed" placeholder="Breed" /> <br />
             <div class="form">
@@ -101,20 +104,26 @@
                 :key="s.id"
                 @click="selectDog(s)"
               >
-                {{ s.title }}
+                {{ s.name }}
               </div>
             </div>
           </div>
           <div class="upload" v-if="foundDog">
-            <input v-model="newTitle" />
-            <p></p>
             <img :src="foundDog.path" />
             <p></p>
-            <textarea v-model="newDesc" cols="30" rows="10"></textarea>
+            <h3>Name</h3>
+            <input v-model="editDogName" />
+            <p></p>
+            <h3>Breed</h3>
+            <input v-model="editDogBreed" />
+            <p></p>
+            <h3>Age</h3>
+            <input type="number" v-model="editDogAge" />
           </div>
+          <p></p>
           <div class="actions" v-if="foundDog">
-            <button @click="deleteItem(foundDog)">Delete</button>
-            <button @click="editItem(foundDog)">Edit</button>
+            <button @click="deleteDog(foundDog)">Delete</button>
+            <button @click="editDog(foundDog)">Edit</button>
           </div>
         </div>
       </div>
@@ -252,9 +261,9 @@ export default {
     },
     dogSuggestions() {
       let dogs = this.dogs.filter((item) =>
-        item.title.toLowerCase().startsWith(this.findDog.toLowerCase())
+        item.name.toLowerCase().startsWith(this.findDog.toLowerCase())
       );
-      return dogs.sort((a, b) => a.title > b.title);
+      return dogs.sort((a, b) => a.name > b.name);
     },
   },
   methods: {
@@ -335,10 +344,10 @@ export default {
             dog._id +
             "&name=" +
             this.editDogName +
-            "&age=" +
-            this.editDogAge +
             "&breed=" + 
-            this.editDogBreed,
+            this.editDogBreed + 
+            "&age=" +
+            this.editDogAge,
           {}
         );
         this.foundDog = null;
@@ -372,14 +381,20 @@ export default {
         const formData = new FormData();
         formData.append("photo", this.file, this.file.name);
         let r1 = await axios.post("/api/photos", formData);
-        let r2 = await axios.post("/api/kennels", {
+        let r2 = await axios.post("/api/dogs", {
           name: this.newDogName,
-          kennel: this.newDogKennel,
+          kennelID: this.newDogKennel._id,
           path: r1.data.path,
           breed: this.newDogBreed,
           age: this.newDogAge,
         });
         this.addItem = r2.data;
+        this.newDogName = "";
+        this.newDogFile = null;
+        this.newDogAge = 0;
+        this.newDogBreed = "";
+        this.newDogKennel = null;
+        this.newDogKennelTitle = "";
       } catch (error) {
         console.log(error);
       }

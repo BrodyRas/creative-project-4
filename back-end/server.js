@@ -60,7 +60,7 @@ app.post('/api/photos', upload.single('photo'), async (req, res) => {
 
 // Create a new kennel
 app.post('/api/kennels', async (req, res) => {
-    const kennel = new Kennel({
+  const kennel = new Kennel({
     title: req.body.title,
     slogan: req.body.slogan,
     city: req.body.city,
@@ -117,6 +117,48 @@ app.delete("/api/kennels/:id", async (req, res) => {
 
 
 //DOGS////////////////////////////////////////////////////////////////
+// Create a new dog
+app.post('/api/dogs', async (req, res) => {
+  const kennel = await Kennel.findOne({
+    _id: req.body.kennelID
+  });
+  if(!kennel){
+    res.send(404);
+    return;
+  }
+
+  const dog = new Dog({
+    name: req.body.name,
+    kennel: kennel,
+    age: req.body.age,
+    breed: req.body.breed,
+    path: req.body.path,
+  });
+  console.log(dog);
+  try {
+    await dog.save();
+    res.send(kennel);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+//Update a dog
+app.put("/api/dogs/id=:id&name=:name&breed=:breed&age=:age", async (req, res) => {
+  try {
+    const dog = await Dog.findOne({
+      _id: req.params.id
+    });
+    dog.name = req.params.name;
+    dog.breed = req.params.breed;
+    dog.age = req.params.age;
+    await dog.save();
+    res.sendStatus(200);
+  } catch (e) {
+    console.log(e);
+  }
+})
 
 // Get a list of all the dogs
 app.get('/api/dogs', async (req, res) => {
