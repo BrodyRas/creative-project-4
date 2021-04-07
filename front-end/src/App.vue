@@ -3,11 +3,11 @@
   <div class="header">
     <router-link to="/">
       <div class="logo">
-        <img src="/ordinary.png">
+        <img src="/doggo.png" style="width:100px">
       </div>
     </router-link>
     <div class="title">
-      <h1>Museum of Ordinary Objects</h1>
+      <h1>Kennels and Doggos</h1>
     </div>
   </div>
   <div class="content">
@@ -15,6 +15,8 @@
   </div>
   <div class="footer">
     <router-link to="/admin">Admin</router-link>
+    <p></p>
+    <a href="https://github.com/BrodyRas/creative-project-4">See Source Code!</a>
   </div>
 </div>
 </template>
@@ -36,7 +38,7 @@ body {
 .header {
   display: flex;
   padding: 10px 100px 0px 100px;
-  background-color: #5BDEFF;
+  background-color: rgb(255, 145, 163);
   color: #1C454F;
 }
 
@@ -55,9 +57,9 @@ body {
 
 /* Footer */
 .footer {
-  height: 50px;
+  height: 70px;
   padding: 20px 100px 0px 100px;
-  background: #e3e3e3;
+  background: #c1fff5;
   font-size: 12px;
 }
 

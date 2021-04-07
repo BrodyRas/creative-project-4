@@ -3,7 +3,7 @@
     <h1>The Admin Page!</h1>
 
     <div class="container">
-      <div class="col1">
+      <div class="col">
         <div class="heading">
           <div class="circle">1</div>
           <h2>Add a Kennel</h2>
@@ -53,7 +53,7 @@
           </div>
         </div>
       </div>
-      <div class="col2">
+      <div class="col">
         <div class="heading">
           <div class="circle">1</div>
           <h2>Add a Dog</h2>
@@ -133,18 +133,25 @@
 
 <style scoped>
 .container {
-  display: grid;
+  display: flex;
+  flex-direction: row;
   align-content: center;
-  grid-template: 1fr 1fr / 1fr;
-  background-color: pink;
 }
 
-.col1{
+@media only screen and (max-width: 900px){
+	/*Big smartphones [426px -> 600px]*/
+  .container{
+    flex-direction: column;
+  }
+}
+
+.col{
   grid-column-start: 1;
-}
-
-.col2{
-  grid-column-start: 2;
+  background-color: rgb(255, 215, 222);
+  border: 5px solid pink;
+  border-radius: 20px;
+  padding: 10px 20px;
+  margin: 10px;
 }
 
 .image h2 {

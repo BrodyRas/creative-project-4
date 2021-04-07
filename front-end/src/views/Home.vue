@@ -3,6 +3,7 @@
     <div v-for="k in kennels" :key="k.id">
       <div class="kennel-container">
         <h1>{{ k.title }}</h1>
+        <p><i>{{k.slogan}}</i></p>
         <section class="image-gallery">
           <div
             class="image"
@@ -24,14 +25,16 @@
 
 <style scoped>
 .kennel-container {
-  background-color: rgb(214, 214, 214);
+  background-color: rgb(234, 243, 241);
+  border: 5px solid rgb(176, 230, 217);
   margin: 10px;
   padding: 10px 20px;
   border-radius: 10px;
 }
 
 .dog-container {
-  background-color: rgb(241, 241, 241);
+  background-color: rgb(255, 244, 244);
+  border: 5px solid rgb(248, 189, 189);
   padding: 5px 10px;
   border-radius: 10px;
 }
