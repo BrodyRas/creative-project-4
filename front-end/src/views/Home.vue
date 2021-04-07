@@ -1,16 +1,41 @@
 <template>
   <div class="home">
-    <section class="image-gallery">
-      <div class="image" v-for="item in items" :key="item.id">
-        <h1>{{ item.title }}</h1>
-        <img :src="item.path" />
-        <p>{{ item.desc }}</p>
+    <div v-for="k in kennels" :key="k.id">
+      <div class="kennel-container">
+        <h1>{{ k.title }}</h1>
+        <section class="image-gallery">
+          <div
+            class="image"
+            v-for="dog in dogs.filter((dog) => dog.kennel === k._id)"
+            :key="dog.id"
+          >
+            <div class="dog-container">
+              <h1>{{ dog.name }}</h1>
+              <img :src="dog.path" />
+              <p>{{ dog.breed }}</p>
+              <p>{{ dog.age }}</p>
+            </div>
+          </div>
+        </section>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.kennel-container {
+  background-color: rgb(214, 214, 214);
+  margin: 10px;
+  padding: 10px 20px;
+  border-radius: 10px;
+}
+
+.dog-container {
+  background-color: rgb(241, 241, 241);
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+
 .image h2 {
   font-style: bold;
 }
@@ -66,17 +91,20 @@ export default {
   name: "Home",
   data() {
     return {
-      items: [],
+      kennels: [],
+      dogs: [],
     };
   },
   created() {
-    this.getItems();
+    this.getData();
   },
   methods: {
-    async getItems() {
+    async getData() {
       try {
-        let response = await axios.get("/api/items");
-        this.items = response.data;
+        let response = await axios.get("/api/kennels");
+        this.kennels = response.data;
+        response = await axios.get("/api/dogs");
+        this.dogs = response.data;
         return true;
       } catch (e) {
         console.log(e);
