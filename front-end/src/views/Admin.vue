@@ -12,8 +12,10 @@
           <div class="form">
             <input v-model="newKennelTitle" placeholder="Title" />
             <br />
-            <input type="text" v-model="newKennelSlogan" placeholder="Slogan" /> <br />
-            <input type="text" v-model="newKennelCity" placeholder="City" /> <br />
+            <input type="text" v-model="newKennelSlogan" placeholder="Slogan" />
+            <br />
+            <input type="text" v-model="newKennelCity" placeholder="City" />
+            <br />
             <button @click="uploadKennel">Create Kennel!</button>
           </div>
           <div class="upload" v-if="newKennel">
@@ -41,12 +43,13 @@
           </div>
           <div class="upload" v-if="foundKennel">
             <h3>Title</h3>
-            <input v-model="editKennelTitle" /> <br>
+            <input v-model="editKennelTitle" /> <br />
             <h3>Slogan</h3>
-            <input type="text" v-model="editKennelSlogan"> <br>
+            <input type="text" v-model="editKennelSlogan" /> <br />
             <h3>City</h3>
-            <input type="text" v-model="editKennelCity"> <br>
-          </div> <br>
+            <input type="text" v-model="editKennelCity" /> <br />
+          </div>
+          <br />
           <div class="actions" v-if="foundKennel">
             <button @click="deleteKennel(foundKennel)">Delete</button>
             <button @click="editKennel(foundKennel)">Edit</button>
@@ -64,24 +67,22 @@
             <p></p>
             <input type="file" name="photo" @change="fileChanged" /> <br />
             <br />
-            <!-- <div v-if="newDogFile !== null">
-              <img src="" alt="">
-            </div> -->
             <input type="number" v-model="newDogAge" placeholder="Age" /> <br />
-            <input type="text" v-model="newDogBreed" placeholder="Breed" /> <br />
+            <input type="text" v-model="newDogBreed" placeholder="Breed" />
+            <br />
             <div class="form">
-            <input v-model="newDogKennelTitle" placeholder="Kennel" />
-            <div class="suggestions" v-if="kennelSuggestions.length > 0">
-              <div
-                class="suggestion"
-                v-for="s in kennelSuggestions"
-                :key="s.id"
-                @click="selectDogKennel(s)"
-              >
-                {{ s.title }}
+              <input v-model="newDogKennelTitle" placeholder="Kennel" />
+              <div class="suggestions" v-if="kennelSuggestions.length > 0">
+                <div
+                  class="suggestion"
+                  v-for="s in kennelSuggestions"
+                  :key="s.id"
+                  @click="selectDogKennel(s)"
+                >
+                  {{ s.title }}
+                </div>
               </div>
             </div>
-          </div>
             <button @click="uploadDog">Send to Kennel!</button>
           </div>
           <div class="upload" v-if="newDog">
@@ -128,6 +129,7 @@
         </div>
       </div>
     </div>
+    <button @click="logout">Log Out</button>
   </div>
 </template>
 
@@ -138,14 +140,14 @@
   align-content: center;
 }
 
-@media only screen and (max-width: 900px){
-	/*Big smartphones [426px -> 600px]*/
-  .container{
+@media only screen and (max-width: 900px) {
+  /*Big smartphones [426px -> 600px]*/
+  .container {
     flex-direction: column;
   }
 }
 
-.col{
+.col {
   grid-column-start: 1;
   background-color: rgb(255, 215, 222);
   border: 5px solid pink;
@@ -351,8 +353,8 @@ export default {
             dog._id +
             "&name=" +
             this.editDogName +
-            "&breed=" + 
-            this.editDogBreed + 
+            "&breed=" +
+            this.editDogBreed +
             "&age=" +
             this.editDogAge,
           {}
@@ -404,6 +406,14 @@ export default {
         this.newDogKennelTitle = "";
       } catch (error) {
         console.log(error);
+      }
+    },
+    async logout() {
+      try {
+        await axios.delete("/api/users");
+        this.$root.$data.user = null;
+      } catch (error) {
+        this.$root.$data.user = null;
       }
     },
   },

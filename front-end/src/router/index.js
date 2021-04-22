@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Admin from '../views/Admin.vue'
+import Dog from '../views/Dog.vue'
 
 Vue.use(VueRouter)
 
@@ -14,6 +15,11 @@ const routes = [{
     path: '/admin',
     name: 'admin',
     component: Admin
+  },
+  {
+    path: '/dog/:id',
+    name: 'dog',
+    component: Dog
   }
 ]
 

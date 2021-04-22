@@ -1,18 +1,35 @@
 const express = require('express');
 const bodyParser = require("body-parser");
+const mongoose = require('mongoose');
 
+// setup express
 const app = express();
+
+// setup body parser middleware to conver to JSON and handle URL encoded forms
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: false
 }));
 
-const mongoose = require('mongoose');
-
-// connect to the database
+// connect to the mongodb database
 mongoose.connect('mongodb://localhost:27017/doggos', {
+  useUnifiedTopology: true,
   useNewUrlParser: true
 });
+
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+  name: 'session',
+  keys: [
+    'secretValue'
+  ],
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
 // Configure multer so that it will upload to '../front-end/public/images'
 const multer = require('multer')
@@ -44,6 +61,25 @@ const dogSchema = new mongoose.Schema({
 });
 const Dog = mongoose.model('Dog', dogSchema);
 
+// Create a Comment model
+const commentSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+  },
+  dog: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Dog'
+  },
+  msg: String,
+  created: {
+    type: Date,
+    default: Date.now
+  },
+});
+const Comment = mongoose.model('Comment', commentSchema);
+
+
 // Upload a photo. Uses the multer middleware for the upload and then returns
 // the path where the photo is stored in the file system.
 app.post('/api/photos', upload.single('photo'), async (req, res) => {
@@ -55,6 +91,36 @@ app.post('/api/photos', upload.single('photo'), async (req, res) => {
     path: "/images/" + req.file.filename
   });
 });
+
+/* Middleware */
+
+// middleware function to check for logged-in users
+const validUser = async (req, res, next) => {
+  if (!req.session.userID)
+    return res.status(403).send({
+      message: "not logged in"
+    });
+  try {
+    const user = await User.findOne({
+      _id: req.session.userID
+    });
+    if (!user) {
+      return res.status(403).send({
+        message: "not logged in"
+      });
+    }
+    // set the user field in the request
+    req.user = user;
+  } catch (error) {
+    // Return an error if user does not exist.
+    return res.status(403).send({
+      message: "not logged in"
+    });
+  }
+
+  // if everything succeeds, move to the next middleware
+  next();
+};
 
 //KENNELS////////////////////////////////////////////////////////////////
 
@@ -79,6 +145,7 @@ app.post('/api/kennels', async (req, res) => {
 app.get('/api/kennels', async (req, res) => {
   try {
     let kennels = await Kennel.find();
+    // console.log(kennels)
     res.send(kennels);
   } catch (error) {
     console.log(error);
@@ -122,7 +189,7 @@ app.post('/api/dogs', async (req, res) => {
   const kennel = await Kennel.findOne({
     _id: req.body.kennelID
   });
-  if(!kennel){
+  if (!kennel) {
     res.send(404);
     return;
   }
@@ -164,6 +231,7 @@ app.put("/api/dogs/id=:id&name=:name&breed=:breed&age=:age", async (req, res) =>
 app.get('/api/dogs', async (req, res) => {
   try {
     let dogs = await Dog.find();
+    // console.log(dogs)
     res.send(dogs);
   } catch (error) {
     console.log(error);
@@ -191,6 +259,20 @@ app.get('/api/:kennelID/dogs', async (req, res) => {
   }
 });
 
+// Find one dog by ID
+app.get('/api/dogs/:id', async (req, res) => {
+  try {
+    let dog = await Dog.findOne({
+      _id: req.params.id
+    });
+    res.send(dog);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+// Delete one dog
 app.delete("/api/dogs/:id", async (req, res) => {
   try {
     await Dog.deleteOne({
@@ -203,4 +285,68 @@ app.delete("/api/dogs/:id", async (req, res) => {
   }
 });
 
+//COMMENTS/////////////////////////////////////////////////////////////////
+// Create a new comment
+app.post('/api/comments', async (req, res) => {
+  console.log(req.body.dog)
+  const dog = await Dog.findOne({
+    _id: req.body.dog
+  });
+  if (!dog) {
+    console.log("Can't find dog")
+    res.sendStatus(404);
+    return;
+  }
+  // const user = await User.findOne({
+  //   _id: req.body.user
+  // });
+  // if (!user) {
+  //   console.log("Can't find user!")
+  //   res.sendStatus(404);
+  //   return;
+  // }
+
+  const comment = new Comment({
+    user: req.body.user,
+    dog: dog,
+    msg: req.body.msg,
+  });
+
+  console.log(comment);
+  try {
+    await comment.save();
+    res.send(comment);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+//Get comments by dog
+app.get('/api/comments/:id', async (req, res) => {
+  try {
+    let dog = await Dog.find({
+      _id: req.params.id
+    });
+    if (!dog) {
+      res.send(404);
+      return;
+    }
+    let comments = await Comment.find({
+      dog: dog
+    })
+    console.log(comments)
+    res.send(comments);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+
+
+
+// import the users module and setup its API path
+const users = require("./users.js");
+app.use("/api/users", users.routes);
 app.listen(3000, () => console.log('Server listening on port 3000!'));
