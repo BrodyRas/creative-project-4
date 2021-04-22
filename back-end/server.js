@@ -343,9 +343,6 @@ app.get('/api/comments/:id', async (req, res) => {
   }
 });
 
-
-
-
 // import the users module and setup its API path
 const users = require("./users.js");
 app.use("/api/users", users.routes);

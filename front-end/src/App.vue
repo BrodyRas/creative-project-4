@@ -10,17 +10,11 @@
       <div class="title">
         <h1>Kennels and Doggos</h1>
       </div>
-      <div v-if="user !== undefined">
-        <p>{{ user.firstName + " " + user.lastName }}</p>
-        <p>Log Out</p>
-      </div>
     </div>
     <div class="content">
       <router-view />
     </div>
     <div class="footer">
-      <router-link v-if="user !== null" to="/admin">Admin</router-link>
-      <p></p>
       <a href="https://github.com/BrodyRas/creative-project-4"
         >See Source Code!</a
       >
@@ -95,11 +89,6 @@ export default {
     } catch (error) {
       this.$root.$data.user = null;
     }
-  },
-  computed: {
-    user() {
-      return this.$root.$data.user;
-    },
   },
 };
 </script>

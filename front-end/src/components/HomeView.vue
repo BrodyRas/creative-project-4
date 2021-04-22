@@ -24,6 +24,7 @@
         </section>
       </div>
     </div>
+    <router-link v-if="user !== null" to="/admin">See Admin Page</router-link>
   </div>
 </template>
 
@@ -103,6 +104,11 @@ export default {
   },
   created() {
     this.getData();
+  },
+  computed: {
+    user() {
+      return this.$root.$data.user;
+    },
   },
   methods: {
     async getData() {

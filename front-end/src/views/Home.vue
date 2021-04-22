@@ -1,7 +1,8 @@
 <template>
   <div class="home">
-    <Login v-if="user === null" />
-    <HomeView v-else />
+    <HomeView v-if="user !== null" />
+    <Login v-else />
+
   </div>
 </template>
 
